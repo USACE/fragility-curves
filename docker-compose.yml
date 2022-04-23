@@ -3,7 +3,16 @@ networks:
   default:
     name: wat
 services:
+  sqs:
+    container_name: fc_sqs
+    image: roribio16/alpine-sqs
+    ports:
+      - '9324:9324'
+      - '9325:9325'
+    volumes:
+      - ./sqs-emulator:/opt/custom
   cache:
+    container_name: fc_redis
     image: redis:6.2-alpine
     restart: always
     ports:
@@ -13,6 +22,7 @@ services:
       - cache:/testing
 
   minio:
+    container_name: fc_s3
     image: minio/minio
     environment:
       - MINIO_ROOT_USER=AKIAIOSFODNN7EXAMPLE
@@ -39,6 +49,7 @@ services:
     volumes:
       - ./configs:/configs/data/fragilitycurveplugin
   fragilitycurveplugin:
+    container_name: fc
     depends_on: 
       - minio_init
       - cache
@@ -58,6 +69,7 @@ services:
       - REDIS_HOST=cache
       - REDIS_PORT=6379
       - REDIS_PASSWORD=eYVX7EwVmmxKPCDmwMtyKVge8oLd2t81
+      - SQS_ENDPOINT=http://sqs:9324
     volumes:
       - ./:/workspaces
 volumes:

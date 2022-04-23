@@ -2,26 +2,39 @@ package main
 
 import (
 	"fmt"
+	"log"
 
+	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/service/sqs"
 	"github.com/henrygeorgist/fragilitycurveplugin/model"
+	"github.com/usace/wat-api/utils"
 )
 
 func main() {
 	fmt.Println("fragility curves!")
 	payload := "/data/fragilitycurveplugin/watModelPayload.yml"
 	fmt.Println("initializing filestore")
-	fs, err := model.InitStore()
+	loader, err := utils.InitLoader("")
 	if err != nil {
-		fmt.Println(err)
+		log.Fatal(err)
 		return
 	}
-	fmt.Println("initializing Redis")
-	_, err = model.InitRedis()
+	fs, err := loader.InitStore()
 	if err != nil {
-		fmt.Println(err)
+		log.Fatal(err)
 		return
 	}
-	payloadInstructions, err := model.LoadPayloadFromS3(payload, fs)
+	_, err = loader.InitRedis()
+	if err != nil {
+		log.Fatal(err)
+		return
+	}
+	queue, err := loader.InitQueue()
+	if err != nil {
+		log.Fatal(err)
+		return
+	}
+	payloadInstructions, err := utils.LoadModelPayloadFromS3(payload, fs)
 	if err != nil {
 		fmt.Println("not successful", err)
 		return
@@ -33,16 +46,31 @@ func main() {
 	}
 	//load the model data into memory.
 	fcm := model.FragilityCurveModel{}
-	err = model.NewPluginModelFromS3(payloadInstructions.ModelConfigurationPaths[0], fs, &fcm)
+	err = utils.LoadJsonPluginModelFromS3(payloadInstructions.ModelConfigurationPaths[0], fs, &fcm)
 	if err != nil {
 		fmt.Println("error:", err)
 		return
 	} else {
 		fmt.Println("computing model")
 		//fmt.Println(hsm)
-		fcm.Compute(&payloadInstructions, fs)
-
+		err = fcm.Compute(&payloadInstructions, fs)
+		if err != nil {
+			log.Fatal(err)
+		}
 	}
 	//}
-	fmt.Println("Made it to the end.....")
+	message := "Fragility Curve Complete"
+	fmt.Println("sending message: " + message)
+	queueURL := fmt.Sprintf("%v/queue/messages", queue.Endpoint)
+	fmt.Println("sending message to:", queueURL)
+	_, err = queue.SendMessage(&sqs.SendMessageInput{
+		DelaySeconds: aws.Int64(1),
+		MessageBody:  aws.String(message),
+		QueueUrl:     &queueURL,
+	})
+	if err != nil {
+		log.Fatal(err)
+		return
+	}
+	fmt.Println(message)
 }
