@@ -1,0 +1,22 @@
+target_plugin: fragilitycurveplugin
+model_configuration:
+  model_name: fc
+  model_configuration_paths:
+  - /data/fragilitycurveplugin/fc.json
+model_links:
+  linked_inputs:
+  required_outputs:
+  - name: levee1.csv
+    parameter: stage
+    format: csv
+event_config:
+  output_destination: /data/fragilitycurve/output/
+  realization:
+    index: 1
+    seed: 1234
+  event:
+    index: 1
+    seed: 5678
+  time_window:
+    starttime: 2018-01-01T01:01:01.000000001-05:00
+    endtime: 2020-12-31T01:01:01.000000001-05:00
