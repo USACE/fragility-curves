@@ -37,8 +37,8 @@ services:
       exit 0;
       "
     volumes:
-      - ./configs:/configs/data/hydrographscaler
-  hydro-scalar:
+      - ./configs:/configs/data/fragilitycurveplugin
+  fragilitycurveplugin:
     depends_on: 
       - minio_init
       - cache
