@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"log"
 
@@ -12,7 +13,16 @@ import (
 
 func main() {
 	fmt.Println("fragility curves!")
-	payload := "/data/fragilitycurveplugin/watModelPayload.yml"
+	var payload string
+	flag.StringVar(&payload, "payload", "", "please specify an input file using `-payload=pathtopayload.yml`")
+	flag.Parse()
+
+	if payload == "" {
+		fmt.Println("given a blank path...")
+		fmt.Println("please specify an input file using `-payload=pathtopayload.yml`")
+		return
+	}
+	//payload := "/data/fragilitycurveplugin/watModelPayload.yml"
 	fmt.Println("initializing filestore")
 	loader, err := utils.InitLoader("")
 	if err != nil {
@@ -73,4 +83,5 @@ func main() {
 		return
 	}
 	fmt.Println(message)
+	return
 }
