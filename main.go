@@ -56,6 +56,7 @@ func main() {
 	}
 	//load the model data into memory.
 	fcm := model.FragilityCurveModel{}
+	val := 0.0
 	err = utils.LoadJsonPluginModelFromS3(payloadInstructions.ModelConfigurationPaths[0], fs, &fcm)
 	if err != nil {
 		fmt.Println("error:", err)
@@ -63,15 +64,15 @@ func main() {
 	} else {
 		fmt.Println("computing model")
 		//fmt.Println(hsm)
-		err = fcm.Compute(&payloadInstructions, fs)
+		val, err = fcm.Compute(&payloadInstructions, fs)
 		if err != nil {
 			log.Fatal(err)
 		}
 	}
 	//}
-	message := "Fragility Curve Complete"
+	message := fmt.Sprintf("Fragility Curve Complete %v", val)
 	fmt.Println("sending message: " + message)
-	queueURL := fmt.Sprintf("%v/queue/messages", queue.Endpoint)
+	queueURL := fmt.Sprintf("%v/queue/events", queue.Endpoint)
 	fmt.Println("sending message to:", queueURL)
 	_, err = queue.SendMessage(&sqs.SendMessageInput{
 		DelaySeconds: aws.Int64(1),

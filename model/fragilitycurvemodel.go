@@ -18,17 +18,18 @@ type FragilityCurveLocation struct {
 	FragilityCurve paireddata.UncertaintyPairedData `json:"stage-probability"`
 }
 
-func (fcm FragilityCurveModel) Compute(modelpayload *wat.ModelPayload, fs filestore.FileStore) error {
+func (fcm FragilityCurveModel) Compute(modelpayload *wat.ModelPayload, fs filestore.FileStore) (float64, error) {
 	realizationSeed := modelpayload.Realization.Seed
 	eventSeed := modelpayload.Event.Seed
 	realizationRandom := rand.New(rand.NewSource(realizationSeed))
 	eventRandom := rand.New(rand.NewSource(eventSeed))
+	failure_elevation := 0.0
 	for _, fcl := range fcm.Locations {
 		//sample fragility curve for a location with knowledge uncertianty
 		pd := fcl.FragilityCurve.SampleValueSampler(realizationRandom.Float64())
 		//sample sampledfragility curve at a location with natural variability
-		falure_elevation := pd.SampleValue(eventRandom.Float64())
-		fmt.Println(falure_elevation)
+		failure_elevation = pd.SampleValue(eventRandom.Float64())
+		fmt.Println(failure_elevation)
 	}
-	return nil
+	return failure_elevation, nil
 }
