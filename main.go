@@ -57,7 +57,8 @@ func main() {
 	//load the model data into memory.
 	fcm := model.FragilityCurveModel{}
 	val := 0.0
-	err = utils.LoadJsonPluginModelFromS3(payloadInstructions.ModelConfigurationPaths[0], fs, &fcm)
+	path := payloadInstructions.ModelConfigurationResources[0].Authority + payloadInstructions.ModelConfigurationResources[0].Fragment
+	err = utils.LoadJsonPluginModelFromS3(path, fs, &fcm)
 	if err != nil {
 		fmt.Println("error:", err)
 		return
