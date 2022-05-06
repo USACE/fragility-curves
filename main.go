@@ -34,7 +34,7 @@ func main() {
 		log.Fatal(err)
 		return
 	}
-	_, err = loader.InitRedis()
+	red, err := loader.InitRedis()
 	if err != nil {
 		log.Fatal(err)
 		return
@@ -80,6 +80,9 @@ func main() {
 		MessageBody:  aws.String(message),
 		QueueUrl:     &queueURL,
 	})
+	key := payloadInstructions.PluginImageAndTag + "_" + payloadInstructions.Name + "_R" + fmt.Sprint(payloadInstructions.Realization.Index) + "_E" + fmt.Sprint(payloadInstructions.Event.Index)
+	out := red.Set(key, "complete", 0)
+	fmt.Println(out)
 	if err != nil {
 		log.Fatal(err)
 		return
