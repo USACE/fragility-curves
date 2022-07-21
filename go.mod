@@ -1,4 +1,4 @@
-module github.com/henrygeorgist/fragilitycurveplugin
+module github.com/usace/fragility-curves
 
 go 1.18
 

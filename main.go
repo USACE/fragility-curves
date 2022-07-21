@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/henrygeorgist/fragilitycurveplugin/fragilitycurve"
+	"github.com/usace/fragility-curves/fragilitycurve"
 	"github.com/usace/wat-go-sdk/plugin"
 )
 
