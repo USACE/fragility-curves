@@ -20,13 +20,15 @@ require (
 	golang.org/x/net v0.0.0-20220425223048-2871e0cb64e4 // indirect
 	golang.org/x/sys v0.0.0-20220429233432-b5fbb4746d32 // indirect
 	golang.org/x/text v0.3.7 // indirect
-	golang.org/x/time v0.0.0-20220411224347-583f2d630306 // indirect
+	golang.org/x/time v0.0.0-20220609170525-579cf78fd858 // indirect
+	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
 
 require (
 	github.com/USACE/filestore v0.1.5-0.20220416172749-6484811f7b13
 	github.com/go-redis/redis v6.15.9+incompatible
 	github.com/usace/wat-api v0.0.0-20220501102854-56196b93edd0
+	github.com/usace/wat-go-sdk v0.0.0-20220721151408-5d46fa51aea3
 	golang.org/x/exp v0.0.0-20191002040644-a1355ae1e2c3 // indirect
 	gonum.org/v1/gonum v0.9.3 // indirect
 	gopkg.in/yaml.v2 v2.4.0
