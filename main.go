@@ -87,7 +87,7 @@ func computePayload(payload plugin.ModelPayload) error {
 		logError(err, payload)
 		return err
 	}
-	eventConfiguration, err := plugin.LoadEventConfiguration(eventConfigurationResourceInfo.Path)
+	eventConfiguration, err := plugin.LoadEventConfiguration(eventConfigurationResourceInfo)
 	if err != nil {
 		logError(err, payload)
 		return err

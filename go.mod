@@ -38,7 +38,7 @@ require (
 	github.com/USACE/filestore v0.1.5-0.20220416172749-6484811f7b13
 	github.com/go-redis/redis v6.15.9+incompatible
 	github.com/usace/wat-api v0.0.0-20220501102854-56196b93edd0
-	github.com/usace/wat-go-sdk v0.0.0-20220722133636-83d10ca686fb
+	github.com/usace/wat-go-sdk v0.0.0-20220722145724-e4812bb19bd8
 	golang.org/x/exp v0.0.0-20191002040644-a1355ae1e2c3 // indirect
 	gonum.org/v1/gonum v0.9.3 // indirect
 	gopkg.in/yaml.v2 v2.4.0
