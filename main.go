@@ -45,8 +45,13 @@ func main() {
 }
 func computePayload(payload plugin.ModelPayload) error {
 
-	if len(payload.Outputs) != 2 {
-		err := errors.New("more than two outputs were defined")
+	if len(payload.Outputs) != 1 {
+		err := errors.New("more than one output was defined")
+		logError(err, payload)
+		return err
+	}
+	if len(payload.Inputs) != 2 {
+		err := errors.New("more than two inputs were defined")
 		logError(err, payload)
 		return err
 	}
