@@ -95,6 +95,8 @@ github.com/usace/wat-go-sdk v0.0.0-20220721151408-5d46fa51aea3 h1:HQTAHG95O1yDZZ
 github.com/usace/wat-go-sdk v0.0.0-20220721151408-5d46fa51aea3/go.mod h1:7Tj4KtLkO3fP2VKtGLIcZ2+vTEat70d/xOa3d4HT7yw=
 github.com/usace/wat-go-sdk v0.0.0-20220722130139-7c76b80a3c61 h1:UTy8+0FeE7MqGnDvG1jeDuCp+bCx/JrJ6zn6vqZbL8c=
 github.com/usace/wat-go-sdk v0.0.0-20220722130139-7c76b80a3c61/go.mod h1:7Tj4KtLkO3fP2VKtGLIcZ2+vTEat70d/xOa3d4HT7yw=
+github.com/usace/wat-go-sdk v0.0.0-20220722133636-83d10ca686fb h1:M6RdHrdZCR7qAjN6WGSs0KRXr6IuYQsbBXeWST3D4t0=
+github.com/usace/wat-go-sdk v0.0.0-20220722133636-83d10ca686fb/go.mod h1:7Tj4KtLkO3fP2VKtGLIcZ2+vTEat70d/xOa3d4HT7yw=
 github.com/valyala/bytebufferpool v1.0.0 h1:GqA5TC/0021Y/b9FG4Oi9Mr3q7XYx6KllzawFIhcdPw=
 github.com/valyala/bytebufferpool v1.0.0/go.mod h1:6bBcMArwyJ5K/AmCkWv1jt77kVWyCJ6HpOuEn7z0Csc=
 github.com/valyala/fasttemplate v1.2.1 h1:TVEnxayobAdVkhQfrfes2IzOB6o+z4roRkPF52WA1u4=
