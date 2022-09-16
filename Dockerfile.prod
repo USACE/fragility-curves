@@ -1,0 +1,22 @@
+FROM golang:1.19-alpine3.16 AS builder
+
+RUN apk add --no-cache \
+    build-base \
+    gcc \
+    git
+ENV GOROOT=/usr/local/go
+ENV GOPATH=/go
+ENV PATH=$PATH:$GOROOT/bin:$GOPATH/bin
+
+WORKDIR /app
+RUN git clone https://github.com/USACE/fragility-curves.git
+WORKDIR /app/fragility-curves
+RUN go mod download
+RUN go mod tidy
+RUN go build main.go
+
+
+FROM alpine:3.16 AS prod
+
+WORKDIR /app
+COPY --from=builder /app/fragility-curves/main .
