@@ -1,6 +1,6 @@
 module github.com/usace/fragility-curves
 
-go 1.18
+go 1.19
 
 require github.com/HydrologicEngineeringCenter/go-statistics v0.0.0-20220420143356-562ee86d1eb2
 

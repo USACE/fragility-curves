@@ -14,14 +14,14 @@ import (
 func main() {
 	fmt.Println("fragility curves!")
 	var payloadPath string
-	flag.StringVar(&payloadPath, "payload", "", "please specify an input file using `-payload=pathtopayload.yml`")
+	flag.StringVar(&payloadPath, "payload", "pathtopayload.yml", "please specify an input file using `-payload pathtopayload.yml`")
 	flag.Parse()
 	if payloadPath == "" {
 		plugin.Log(plugin.Message{
 			Status:    plugin.FAILED,
 			Progress:  0,
 			Level:     plugin.ERROR,
-			Message:   "given a blank path...\n\tplease specify an input file using `-payload=pathtopayload.yml`",
+			Message:   "given a blank path...\n\tplease specify an input file using `payload pathtopayload.yml`",
 			Sender:    "fragilitycurve",
 			PayloadId: "unknown payloadid because the plugin package could not be properly initalized",
 		})
