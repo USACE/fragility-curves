@@ -83,6 +83,8 @@ github.com/stretchr/objx v0.1.0/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+
 github.com/stretchr/testify v1.2.2/go.mod h1:a8OnRcib4nhh0OaRAV+Yts87kKdq0PP7pXfy6kDkUVs=
 github.com/stretchr/testify v1.5.1/go.mod h1:5W2xD1RspED5o8YsWQXVCued0rvSQ+mT+I5cxcmMvtA=
 github.com/stretchr/testify v1.7.0/go.mod h1:6Fq8oRcR53rry900zMqJjRRixrwX3KX962/h/Wwjteg=
+github.com/usace/filestore v0.0.0-20220311141535-9ec1e86b5058 h1:H5z9z8TXJqRtiAKficjEu/dyf0KONfMFBIJ8cYzhucY=
+github.com/usace/filestore v0.0.0-20220311141535-9ec1e86b5058/go.mod h1:Q3fxW3tMg1HCVmThpy5EZ1dsETlTDkskQzVgBiPYI1Y=
 github.com/usace/wat-api v0.0.0-20220418234337-a157f5735c25 h1:ek0wDV0wdt1GF+DYpG3lnu65NMBnjLB/AYzeB3raXBY=
 github.com/usace/wat-api v0.0.0-20220418234337-a157f5735c25/go.mod h1:z2U9bwVXY1pMj3TYGdXz8Iu39u4S+9v3xAJyhP4ZeZA=
 github.com/usace/wat-api v0.0.0-20220423201218-29c2688fdd5b h1:mi0A4a6+isoC8VNIdvw7siQkHDodgWRfLlDLIKny7yg=
@@ -91,6 +93,8 @@ github.com/usace/wat-api v0.0.0-20220430163913-3c963088c10c h1:DZIV98dHl+ottuR15
 github.com/usace/wat-api v0.0.0-20220430163913-3c963088c10c/go.mod h1:3I5LgCY+lSlmPwegDrX5LU0yBROPsaxCfNVBcH37uzk=
 github.com/usace/wat-api v0.0.0-20220501102854-56196b93edd0 h1:m7H+6MWicZQpRMpNFX9cIJb/i6Gaz57iQF722KS89z4=
 github.com/usace/wat-api v0.0.0-20220501102854-56196b93edd0/go.mod h1:3I5LgCY+lSlmPwegDrX5LU0yBROPsaxCfNVBcH37uzk=
+github.com/usace/wat-go v0.0.0-20221227201706-e2006a01d558 h1:2od5bxnGJ9QLkSOGGdGwoE1LX9wTgELeJfqJG6ReJKE=
+github.com/usace/wat-go v0.0.0-20221227201706-e2006a01d558/go.mod h1:0kivPzUBo45HzjBbE3hpWKFtWl/TLaN8C+4dCEDhzCE=
 github.com/usace/wat-go-sdk v0.0.0-20220721151408-5d46fa51aea3 h1:HQTAHG95O1yDZZm6MYtXPXH2vZeasApzqtCOjOnmSlc=
 github.com/usace/wat-go-sdk v0.0.0-20220721151408-5d46fa51aea3/go.mod h1:7Tj4KtLkO3fP2VKtGLIcZ2+vTEat70d/xOa3d4HT7yw=
 github.com/usace/wat-go-sdk v0.0.0-20220722130139-7c76b80a3c61 h1:UTy8+0FeE7MqGnDvG1jeDuCp+bCx/JrJ6zn6vqZbL8c=

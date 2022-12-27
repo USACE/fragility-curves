@@ -24,6 +24,7 @@ require (
 	github.com/opencontainers/image-spec v1.0.2 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/sirupsen/logrus v1.8.1 // indirect
+	github.com/usace/filestore v0.0.0-20220311141535-9ec1e86b5058 // indirect
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
 	github.com/valyala/fasttemplate v1.2.1 // indirect
 	golang.org/x/crypto v0.0.0-20220427172511-eb4f295cb31f // indirect
@@ -38,6 +39,7 @@ require (
 	github.com/USACE/filestore v0.1.5-0.20220416172749-6484811f7b13
 	github.com/go-redis/redis v6.15.9+incompatible
 	github.com/usace/wat-api v0.0.0-20220501102854-56196b93edd0
+	github.com/usace/wat-go v0.0.0-20221227201706-e2006a01d558
 	github.com/usace/wat-go-sdk v0.0.0-20220722145724-e4812bb19bd8
 	golang.org/x/exp v0.0.0-20191002040644-a1355ae1e2c3 // indirect
 	gonum.org/v1/gonum v0.9.3 // indirect
