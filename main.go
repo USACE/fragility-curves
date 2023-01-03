@@ -8,76 +8,54 @@ import (
 
 	"github.com/usace/fragility-curves/fragilitycurve"
 	"github.com/usace/wat-go"
+	"github.com/usace/wat-go/plugin"
 )
-
-var pluginName string = "fragilitycurveplugin"
 
 func main() {
 	fmt.Println("fragility curves!")
-	ws, err := wat.NewS3WatStore()
+	pm, err := wat.InitPluginManager()
 	if err != nil {
-		wat.Log(wat.Message{
-			Status:    wat.FAILED,
-			Progress:  0,
-			Level:     wat.ERROR,
-			Message:   err.Error(),
-			Sender:    pluginName,
-			PayloadId: "unknown",
+		pm.LogMessage(wat.Message{
+			Message: err.Error(),
 		})
 	}
-	payload, err := ws.GetPayload()
+	payload, err := pm.GetPayload()
 	if err != nil {
-		wat.Log(wat.Message{
-			Status:    wat.FAILED,
-			Progress:  0,
-			Level:     wat.ERROR,
-			Message:   err.Error(),
-			Sender:    pluginName,
-			PayloadId: "unknown",
+		pm.LogError(wat.Error{
+			ErrorLevel: wat.ERROR,
+			Error:      err.Error(),
 		})
 		return
 	}
-	err = computePayload(payload, ws)
+	err = computePayload(payload, pm)
 	if err != nil {
-		wat.Log(wat.Message{
-			Status:    wat.FAILED,
-			Progress:  0,
-			Level:     wat.ERROR,
-			Message:   err.Error(),
-			Sender:    pluginName,
-			PayloadId: "unknown",
+		pm.LogError(wat.Error{
+			ErrorLevel: wat.ERROR,
+			Error:      err.Error(),
 		})
 		return
 	}
 }
-func computePayload(payload wat.Payload, ws wat.WatStore) error {
+func computePayload(payload wat.Payload, pm wat.PluginManager) error {
 
 	if len(payload.Outputs) != 1 {
 		err := errors.New("more than one output was defined")
-		wat.Log(wat.Message{
-			Status:    wat.FAILED,
-			Progress:  0,
-			Level:     wat.ERROR,
-			Message:   err.Error(),
-			Sender:    pluginName,
-			PayloadId: "unknown",
+		pm.LogError(wat.Error{
+			ErrorLevel: wat.ERROR,
+			Error:      err.Error(),
 		})
 		return err
 	}
 	if len(payload.Inputs) != 2 {
 		err := errors.New("more than two inputs were defined")
-		wat.Log(wat.Message{
-			Status:    wat.FAILED,
-			Progress:  0,
-			Level:     wat.ERROR,
-			Message:   err.Error(),
-			Sender:    pluginName,
-			PayloadId: "unknown",
+		pm.LogError(wat.Error{
+			ErrorLevel: wat.ERROR,
+			Error:      err.Error(),
 		})
 		return err
 	}
 	var modelResourceInfo wat.DataSource
-	//var eventConfigurationResourceInfo wat.DataSource
+	var eventConfigurationResourceInfo wat.DataSource
 	foundModel := false
 	foundEventConfig := false
 	//seedSetName := ""
@@ -93,135 +71,100 @@ func computePayload(payload wat.Payload, ws wat.WatStore) error {
 			foundModel = true
 		}
 		if strings.Contains(input.Name, "eventconfiguration.json") { //not sure this is how we will make this work.
-			//eventConfigurationResourceInfo = input
+			eventConfigurationResourceInfo = input
 			foundEventConfig = true
 		}
 	}
 	if !foundModel {
 		err := fmt.Errorf("could not find %s.json", modelName)
-		wat.Log(wat.Message{
-			Status:    wat.FAILED,
-			Progress:  0,
-			Level:     wat.ERROR,
-			Message:   err.Error(),
-			Sender:    pluginName,
-			PayloadId: "unknown",
+		pm.LogError(wat.Error{
+			ErrorLevel: wat.ERROR,
+			Error:      err.Error(),
 		})
 		return err
 	}
 	if !foundEventConfig {
 		err := fmt.Errorf("could not find eventconfiguration.json")
-		wat.Log(wat.Message{
-			Status:    wat.FAILED,
-			Progress:  0,
-			Level:     wat.ERROR,
-			Message:   err.Error(),
-			Sender:    pluginName,
-			PayloadId: "unknown",
+		pm.LogError(wat.Error{
+			ErrorLevel: wat.ERROR,
+			Error:      err.Error(),
 		})
 		return err
 	}
 
-	modelBytes, err := ws.GetObject(modelResourceInfo.Name) //GetObject(modelResourceInfo)
+	modelBytes, err := pm.GetObject(modelResourceInfo)
 	if err != nil {
-		wat.Log(wat.Message{
-			Status:    wat.FAILED,
-			Progress:  0,
-			Level:     wat.ERROR,
-			Message:   err.Error(),
-			Sender:    pluginName,
-			PayloadId: "unknown",
+		pm.LogError(wat.Error{
+			ErrorLevel: wat.ERROR,
+			Error:      err.Error(),
 		})
 		return err
 	}
 	var fcm fragilitycurve.Model
 	err = json.Unmarshal(modelBytes, &fcm)
 	if err != nil {
-		wat.Log(wat.Message{
-			Status:    wat.FAILED,
-			Progress:  0,
-			Level:     wat.ERROR,
-			Message:   err.Error(),
-			Sender:    pluginName,
-			PayloadId: "unknown",
+		pm.LogError(wat.Error{
+			ErrorLevel: wat.ERROR,
+			Error:      err.Error(),
 		})
 		return err
 	}
-	/*eventConfiguration, err := ws.GetObject(eventConfigurationResourceInfo.Name)
+	eventConfiguration, err := pm.GetObject(eventConfigurationResourceInfo)
 	if err != nil {
-		wat.Log(wat.Message{
-			Status:    wat.FAILED,
-			Progress:  0,
-			Level:     wat.ERROR,
-			Message:   err.Error(),
-			Sender:    pluginName,
-			PayloadId: "unknown",
+		pm.LogError(wat.Error{
+			ErrorLevel: wat.ERROR,
+			Error:      err.Error(),
 		})
 		return err
 	}
 	//then we need to get the specific set of seeds.
-	//currently event configuration is not defined in the go-wat package. seedset is not a member of anything specific to cc.
 	var seedSet plugin.SeedSet
 	var ec plugin.EventConfiguration
-	err = json.Unmarshal(eventConfiguration, ec) //this is not right.
-	seedSet, err = ec.SeedSet(seedSetName)
+	err = json.Unmarshal(eventConfiguration, &ec)
 	if err != nil {
-		wat.Log(wat.Message{
-			Status:    wat.FAILED,
-			Progress:  0,
-			Level:     wat.ERROR,
-			Message:   err.Error(),
-			Sender:    pluginName,
-			PayloadId: "unknown",
+		pm.LogError(wat.Error{
+			ErrorLevel: wat.ERROR,
+			Error:      err.Error(),
+		})
+		return err
+	}
+	seedSetName := "fragilitycurveplugin" //not sure this is right
+	seedSet, seedsFound := ec.Seeds[seedSetName]
+	if !seedsFound {
+		pm.LogError(wat.Error{
+			ErrorLevel: wat.ERROR,
+			Error:      fmt.Errorf("no seeds found by name of %v", seedSetName).Error(),
 		})
 		return err
 	}
 	modelResult, err := fcm.Compute(seedSet)
 	if err != nil {
-		wat.Log(wat.Message{
-			Status:    wat.FAILED,
-			Progress:  0,
-			Level:     wat.ERROR,
-			Message:   err.Error(),
-			Sender:    pluginName,
-			PayloadId: "unknown",
+		pm.LogError(wat.Error{
+			ErrorLevel: wat.ERROR,
+			Error:      err.Error(),
 		})
 		return err
 	}
 	bytes, err := json.Marshal(modelResult)
 	if err != nil {
-		wat.Log(wat.Message{
-			Status:    wat.FAILED,
-			Progress:  0,
-			Level:     wat.ERROR,
-			Message:   err.Error(),
-			Sender:    pluginName,
-			PayloadId: "unknown",
+		pm.LogError(wat.Error{
+			ErrorLevel: wat.ERROR,
+			Error:      err.Error(),
 		})
 		return err
 	}
-	//plugin.UpLoadFile(payload.Outputs[0].ResourceInfo, bytes)
-	ioutil.WriteFile(fmt.Sprintf("%v/%v", ws.RootPath(), "temp.out"), bytes, fs.ModeAppend) //dont have access to local root path
-	err = ws.PushObject("temp.out")
+	fmt.Println(string(bytes))
+	err = pm.PutObject(payload.Outputs[0], bytes)
 	if err != nil {
-		wat.Log(wat.Message{
-			Status:    wat.FAILED,
-			Progress:  0,
-			Level:     wat.ERROR,
-			Message:   err.Error(),
-			Sender:    pluginName,
-			PayloadId: "unknown",
+		pm.LogError(wat.Error{
+			ErrorLevel: wat.ERROR,
+			Error:      err.Error(),
 		})
 		return err
 	}
-	plugin.Log(plugin.Message{
-		Status:    plugin.SUCCEEDED,
-		Progress:  100,
-		Level:     plugin.INFO,
-		Message:   "fragility curves complete",
-		Sender:    "fragilitycurve",
-		PayloadId: "unknown",
+	pm.ReportProgress(wat.StatusReport{
+		Status:   wat.SUCCEEDED,
+		Progress: 100,
 	})
-	*/
 	return nil
 }
