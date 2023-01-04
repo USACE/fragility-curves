@@ -6,6 +6,8 @@ The fragility curve plugin takes a set of input seeds representing natural varia
 ## Example Fragility Curve
 The table below gives an example of a fragility curve, the x values are probability and the y values are elevation. The elevation is represented as a distribution for a given probability of failure of the infrastructure being modeled. The elevation is expressed as a distributed variable to represent the uncertainty in the predicted elevation of failure for any given probability.
 
+[Image of Example Fragility Curve](example_fragility_curve.png)
+
 |Probability|Min Elevation|Most Likely Elevation|Max Elevation|Distribution Type|
 |---|---|---|---|---|
 |0.0|98|99|100|Triangular|
