@@ -13,7 +13,7 @@ type Model struct {
 }
 type FragilityCurveLocation struct {
 	Name           string                           `json:"location"`
-	FragilityCurve paireddata.UncertaintyPairedData `json:"stage-probability"`
+	FragilityCurve paireddata.UncertaintyPairedData `json:"probability-stage"`
 }
 type FragilityCurveLocationResult struct {
 	Name             string  `json:"location"`
