@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"strings"
+	"log"
 
 	"github.com/usace/fragility-curves/fragilitycurve"
 	"github.com/usace/wat-go"
@@ -12,31 +12,22 @@ import (
 )
 
 func main() {
-	fmt.Println("fragility curves!")
+	fmt.Println("event generator!")
 	pm, err := wat.InitPluginManager()
 	if err != nil {
-		pm.LogMessage(wat.Message{
-			Message: err.Error(),
-		})
+		log.Fatalf("Unable to initialize the plugin manager: %s\n", err)
 	}
-	payload, err := pm.GetPayload()
-	if err != nil {
-		pm.LogError(wat.Error{
-			ErrorLevel: wat.ERROR,
-			Error:      err.Error(),
-		})
-		return
-	}
+	payload := pm.GetPayload()
 	err = computePayload(payload, pm)
 	if err != nil {
 		pm.LogError(wat.Error{
 			ErrorLevel: wat.ERROR,
 			Error:      err.Error(),
 		})
-		return
 	}
 }
-func computePayload(payload wat.Payload, pm wat.PluginManager) error {
+
+func computePayload(payload wat.Payload, pm *wat.PluginManager) error {
 
 	if len(payload.Outputs) != 1 {
 		err := errors.New("more than one output was defined")
@@ -54,37 +45,16 @@ func computePayload(payload wat.Payload, pm wat.PluginManager) error {
 		})
 		return err
 	}
-	var modelResourceInfo wat.DataSource
-	var eventConfigurationResourceInfo wat.DataSource
-	foundModel := false
-	foundEventConfig := false
-	//seedSetName := ""
-	tmpName, ok := payload.Attributes["ModelName"]
-	modelName := ""
-	if ok {
-		modelName = tmpName.(string)
-		//seedSetName = modelName
-	}
-	for _, input := range payload.Inputs {
-		if strings.Contains(input.Name, modelName+".json") {
-			modelResourceInfo = input
-			foundModel = true
-		}
-		if strings.Contains(input.Name, "eventconfiguration.json") { //not sure this is how we will make this work.
-			eventConfigurationResourceInfo = input
-			foundEventConfig = true
-		}
-	}
-	if !foundModel {
-		err := fmt.Errorf("could not find %s.json", modelName)
+	modelResourceInfo, err := pm.GetInputDataSource("fragilitycurve")
+	if err != nil {
 		pm.LogError(wat.Error{
 			ErrorLevel: wat.ERROR,
 			Error:      err.Error(),
 		})
 		return err
 	}
-	if !foundEventConfig {
-		err := fmt.Errorf("could not find eventconfiguration.json")
+	eventConfigurationResourceInfo, err := pm.GetInputDataSource("eventconfiguration")
+	if err != nil {
 		pm.LogError(wat.Error{
 			ErrorLevel: wat.ERROR,
 			Error:      err.Error(),
@@ -92,16 +62,8 @@ func computePayload(payload wat.Payload, pm wat.PluginManager) error {
 		return err
 	}
 
-	modelBytes, err := pm.GetObject(modelResourceInfo)
-	if err != nil {
-		pm.LogError(wat.Error{
-			ErrorLevel: wat.ERROR,
-			Error:      err.Error(),
-		})
-		return err
-	}
 	var fcm fragilitycurve.Model
-	err = json.Unmarshal(modelBytes, &fcm)
+	modelReader, err := pm.FileReader(modelResourceInfo, 0)
 	if err != nil {
 		pm.LogError(wat.Error{
 			ErrorLevel: wat.ERROR,
@@ -109,7 +71,8 @@ func computePayload(payload wat.Payload, pm wat.PluginManager) error {
 		})
 		return err
 	}
-	eventConfiguration, err := pm.GetObject(eventConfigurationResourceInfo)
+	defer modelReader.Close()
+	err = json.NewDecoder(modelReader).Decode(&fcm)
 	if err != nil {
 		pm.LogError(wat.Error{
 			ErrorLevel: wat.ERROR,
@@ -117,10 +80,10 @@ func computePayload(payload wat.Payload, pm wat.PluginManager) error {
 		})
 		return err
 	}
-	//then we need to get the specific set of seeds.
+
 	var seedSet plugin.SeedSet
 	var ec plugin.EventConfiguration
-	err = json.Unmarshal(eventConfiguration, &ec)
+	eventConfigurationReader, err := pm.FileReader(eventConfigurationResourceInfo, 0)
 	if err != nil {
 		pm.LogError(wat.Error{
 			ErrorLevel: wat.ERROR,
@@ -128,6 +91,16 @@ func computePayload(payload wat.Payload, pm wat.PluginManager) error {
 		})
 		return err
 	}
+	defer eventConfigurationReader.Close()
+	err = json.NewDecoder(eventConfigurationReader).Decode(&ec)
+	if err != nil {
+		pm.LogError(wat.Error{
+			ErrorLevel: wat.ERROR,
+			Error:      err.Error(),
+		})
+		return err
+	}
+
 	seedSetName := "fragilitycurveplugin" //not sure this is right
 	seedSet, seedsFound := ec.Seeds[seedSetName]
 	if !seedsFound {
@@ -154,7 +127,7 @@ func computePayload(payload wat.Payload, pm wat.PluginManager) error {
 		return err
 	}
 	fmt.Println(string(bytes))
-	err = pm.PutObject(payload.Outputs[0], bytes)
+	err = pm.PutFile(bytes, payload.Outputs[0], 0)
 	if err != nil {
 		pm.LogError(wat.Error{
 			ErrorLevel: wat.ERROR,
