@@ -4,7 +4,6 @@ import (
 	"math/rand"
 
 	"github.com/HydrologicEngineeringCenter/go-statistics/paireddata"
-	"github.com/usace/wat-go/plugin"
 )
 
 type Model struct {
@@ -23,9 +22,7 @@ type ModelResult struct {
 	Results []FragilityCurveLocationResult `json:"results"`
 }
 
-func (fcm Model) Compute(seedSet plugin.SeedSet) (ModelResult, error) {
-	realizationSeed := seedSet.RealizationSeed
-	eventSeed := seedSet.EventSeed
+func (fcm Model) Compute(eventSeed int64, realizationSeed int64) (ModelResult, error) {
 	realizationRandom := rand.New(rand.NewSource(realizationSeed))
 	eventRandom := rand.New(rand.NewSource(eventSeed))
 	results := ModelResult{
