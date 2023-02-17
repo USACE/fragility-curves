@@ -53,7 +53,7 @@ func computePayload(payload cc.Payload, pm *cc.PluginManager) error {
 		})
 		return err
 	}
-	eventConfigurationResourceInfo, err := pm.GetInputDataSource("eventconfiguration")
+	eventConfigurationResourceInfo, err := pm.GetInputDataSource("seeds")
 	if err != nil {
 		pm.LogError(cc.Error{
 			ErrorLevel: cc.ERROR,
