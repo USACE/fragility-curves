@@ -15,7 +15,6 @@ require (
 
 require (
 	github.com/usace/cc-go-sdk v0.0.0-20230210172949-b3a98bc3efaa
-	github.com/usace/wat-go v0.0.0-20230206161538-8b19d8acd5ce // indirect
 	golang.org/x/exp v0.0.0-20191030013958-a1ab85dbe136 // indirect
 	gonum.org/v1/gonum v0.9.3 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
