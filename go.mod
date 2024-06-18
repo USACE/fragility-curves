@@ -34,7 +34,7 @@ require (
 )
 
 require (
-	github.com/usace/cc-go-sdk v0.0.0-20240618133029-e5d4b322bc74
+	github.com/usace/cc-go-sdk v0.0.0-20240611184425-06f941ff4742
 	golang.org/x/exp v0.0.0-20240613232115-7f521ea00fb8 // indirect
 	gonum.org/v1/gonum v0.15.0 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect

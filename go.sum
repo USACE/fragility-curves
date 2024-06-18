@@ -89,6 +89,8 @@ github.com/stretchr/testify v1.2.2/go.mod h1:a8OnRcib4nhh0OaRAV+Yts87kKdq0PP7pXf
 github.com/stretchr/testify v1.5.1/go.mod h1:5W2xD1RspED5o8YsWQXVCued0rvSQ+mT+I5cxcmMvtA=
 github.com/usace/cc-go-sdk v0.0.0-20230210172949-b3a98bc3efaa h1:GXBsrZeoAM5X2K/9+E24alUKRaVIkL+opN9YcH5CEtM=
 github.com/usace/cc-go-sdk v0.0.0-20230210172949-b3a98bc3efaa/go.mod h1:QY9pYTAhWMAexyhzGSMziUkLyqCwFMiaUiyykrm+lHI=
+github.com/usace/cc-go-sdk v0.0.0-20240611184425-06f941ff4742 h1:imZfnkdKbA4njhoCZOji2g4GdbBtw/MmFJl7ffZQY4s=
+github.com/usace/cc-go-sdk v0.0.0-20240611184425-06f941ff4742/go.mod h1:YKzh58ylozTC8hd/lzDsuohoccDByo6Cn0SLPuLhwiQ=
 github.com/usace/cc-go-sdk v0.0.0-20240618133029-e5d4b322bc74 h1:6mS0UyrIBBG9LaaFv+BKlzjb946OjMhNVtW/cEhkn38=
 github.com/usace/cc-go-sdk v0.0.0-20240618133029-e5d4b322bc74/go.mod h1:YKzh58ylozTC8hd/lzDsuohoccDByo6Cn0SLPuLhwiQ=
 github.com/usace/filesapi v0.0.0-20240603195053-3fa10ec2cb22 h1:pI5oFl4PD9dwZWh12l09A/QsxSodWmxItzT3+44MLpo=
