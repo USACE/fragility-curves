@@ -25,6 +25,7 @@ func main() {
 			Error:      err.Error(),
 		})
 	}
+
 }
 
 func computePayload(payload cc.Payload, pm *cc.PluginManager) error {
@@ -101,7 +102,7 @@ func computePayload(payload cc.Payload, pm *cc.PluginManager) error {
 		return err
 	}
 
-	seedSetName := "fragilitycurveplugin" //not sure this is right
+	seedSetName := "fragilitycurveplugin"
 	seedSet, seedsFound := ec.Seeds[seedSetName]
 	if !seedsFound {
 		pm.LogError(cc.Error{

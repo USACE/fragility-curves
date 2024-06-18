@@ -74,3 +74,24 @@ func createSampleData() paireddata.UncertaintyPairedData {
 
 	return paireddata.UncertaintyPairedData{Xvals: xs, Yvals: ydists}
 }
+func TestSampleFragilityCurve( t *testing.T){
+	file, err := os.Open("/workspaces/fragilitycurveplugin/configs/fc.json")
+	if err != nil {
+		fmt.Println(err)
+		t.Fail()
+	}
+	body, err := ioutil.ReadAll(file)
+	if err != nil {
+		fmt.Println(err)
+		t.Fail()
+	}
+	fcm := Model{}
+	errjson := json.Unmarshal(body, &fcm)
+	if errjson != nil {
+		fmt.Println(errjson)
+		t.Fail()
+	}
+	modelResult, err := fcm.Compute(1234,1234)
+	bytes, err := json.Marshal(modelResult)
+	fmt.Println(string(bytes))
+}
