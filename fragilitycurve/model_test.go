@@ -3,6 +3,7 @@ package fragilitycurve
 import (
 	"encoding/json"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"os"
 	"testing"
@@ -12,7 +13,7 @@ import (
 )
 
 func TestModelUnMarshal(t *testing.T) {
-	file, err := os.Open("/workspaces/fragilitycurveplugin/configs/fc.json")
+	file, err := os.Open("/workspaces/fragilitycurveplugin/configs/fragilitycurve.json")
 	if err != nil {
 		fmt.Println(err)
 		t.Fail()
@@ -29,7 +30,20 @@ func TestModelUnMarshal(t *testing.T) {
 		t.Fail()
 	}
 }
-
+func TestModelCSV(t *testing.T) {
+	file, err := os.Open("/workspaces/fragilitycurveplugin/configs/levee1_fragilitycurve.csv")
+	if err != nil {
+		fmt.Println(err)
+		t.Fail()
+	}
+	body, err := io.ReadAll(file)
+	if err != nil {
+		fmt.Println(err)
+		t.Fail()
+	}
+	fcl := InitFragilityCurveLocation(body)
+	fmt.Print(fcl)
+}
 func TestModelMarshal(t *testing.T) {
 	filepath := "/workspaces/fragilitycurveplugin/configs/fc_test.json"
 	file, err := os.OpenFile(filepath, os.O_WRONLY|os.O_CREATE, 0600)
@@ -74,8 +88,8 @@ func createSampleData() paireddata.UncertaintyPairedData {
 
 	return paireddata.UncertaintyPairedData{Xvals: xs, Yvals: ydists}
 }
-func TestSampleFragilityCurve( t *testing.T){
-	file, err := os.Open("/workspaces/fragilitycurveplugin/configs/fc.json")
+func TestSampleFragilityCurve(t *testing.T) {
+	file, err := os.Open("/workspaces/fragilitycurveplugin/configs/fragilitycurve.json")
 	if err != nil {
 		fmt.Println(err)
 		t.Fail()
@@ -91,7 +105,7 @@ func TestSampleFragilityCurve( t *testing.T){
 		fmt.Println(errjson)
 		t.Fail()
 	}
-	modelResult, err := fcm.Compute(1234,1234)
+	modelResult, err := fcm.Compute(1234, 1234)
 	bytes, err := json.Marshal(modelResult)
 	fmt.Println(string(bytes))
 }

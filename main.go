@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"strings"
 
 	"github.com/usace/cc-go-sdk"
 	"github.com/usace/cc-go-sdk/plugin"
@@ -38,22 +39,7 @@ func computePayload(payload cc.Payload, pm *cc.PluginManager) error {
 		})
 		return err
 	}
-	if len(payload.Inputs) != 2 {
-		err := errors.New("more than two inputs were defined")
-		pm.LogError(cc.Error{
-			ErrorLevel: cc.ERROR,
-			Error:      err.Error(),
-		})
-		return err
-	}
-	modelResourceInfo, err := pm.GetInputDataSource("fragilitycurve")
-	if err != nil {
-		pm.LogError(cc.Error{
-			ErrorLevel: cc.ERROR,
-			Error:      err.Error(),
-		})
-		return err
-	}
+
 	eventConfigurationResourceInfo, err := pm.GetInputDataSource("seeds")
 	if err != nil {
 		pm.LogError(cc.Error{
@@ -62,24 +48,27 @@ func computePayload(payload cc.Payload, pm *cc.PluginManager) error {
 		})
 		return err
 	}
+	//getinfo on the fragilitycurve_directory
+	fcLocations := make([]fragilitycurve.FragilityCurveLocation, 0)
 
-	var fcm fragilitycurve.Model
-	modelReader, err := pm.FileReader(modelResourceInfo, 0)
-	if err != nil {
-		pm.LogError(cc.Error{
-			ErrorLevel: cc.ERROR,
-			Error:      err.Error(),
-		})
-		return err
+	for _, ds := range pm.GetInputDataSources() {
+		if strings.Contains(ds.Name, "_fragilitycurve") {
+			locationbytes, err := pm.GetFile(ds, 0)
+			if err != nil {
+				pm.LogError(cc.Error{
+					ErrorLevel: cc.ERROR,
+					Error:      err.Error(),
+				})
+				return err
+			}
+			fcl := fragilitycurve.InitFragilityCurveLocation(locationbytes)
+			fcLocations = append(fcLocations, fcl)
+		}
 	}
-	defer modelReader.Close()
-	err = json.NewDecoder(modelReader).Decode(&fcm)
-	if err != nil {
-		pm.LogError(cc.Error{
-			ErrorLevel: cc.ERROR,
-			Error:      err.Error(),
-		})
-		return err
+
+	fcm := fragilitycurve.Model{
+		Name:      "model",
+		Locations: fcLocations,
 	}
 
 	var seedSet plugin.SeedSet
