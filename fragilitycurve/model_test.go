@@ -31,18 +31,49 @@ func TestModelUnMarshal(t *testing.T) {
 	}
 }
 func TestModelCSV(t *testing.T) {
-	file, err := os.Open("/workspaces/fragilitycurveplugin/configs/levee1_fragilitycurve.csv")
+	root := "/workspaces/fragilitycurveplugin/configs/curves/"
+	dirEntries, err := os.ReadDir(root)
 	if err != nil {
 		fmt.Println(err)
 		t.Fail()
 	}
-	body, err := io.ReadAll(file)
+	curves := make([]FragilityCurveLocation, 0)
+	for _, f := range dirEntries {
+		fmt.Println(f.Name())
+		file, err := os.Open(fmt.Sprintf("%v%v", root, f.Name()))
+		if err != nil {
+			fmt.Println(err)
+			t.Fail()
+		}
+		body, err := io.ReadAll(file)
+		if err != nil {
+			fmt.Println(err)
+			t.Fail()
+		}
+		fcl := InitFragilityCurveLocation(body)
+		curves = append(curves, fcl)
+	}
+	fcm := Model{
+		Name:      "base_combined",
+		Locations: curves,
+	}
+	bytes, errjson := json.Marshal(fcm)
+	if errjson != nil {
+		fmt.Println(errjson)
+		t.Fail()
+	}
+	filepath := fmt.Sprintf("%v%v", root, "base_combined_system_response_curves.json")
+
+	file, err := os.OpenFile(filepath, os.O_WRONLY|os.O_CREATE, 0600)
 	if err != nil {
 		fmt.Println(err)
 		t.Fail()
 	}
-	fcl := InitFragilityCurveLocation(body)
-	fmt.Print(fcl)
+	_, err = file.Write(bytes)
+	if err != nil {
+		fmt.Println(err)
+		t.Fail()
+	}
 }
 func TestModelMarshal(t *testing.T) {
 	filepath := "/workspaces/fragilitycurveplugin/configs/fc_test.json"

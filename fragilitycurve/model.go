@@ -32,7 +32,7 @@ type ModelResult struct {
 
 func InitFragilityCurveLocation(locationbytes []byte) FragilityCurveLocation {
 	file := string(locationbytes)
-	lines := strings.Split(file, "\n")
+	lines := strings.Split(file, "\r\n")
 	name := parseLine(lines[0])
 	NLD_System_Id := parseLine(lines[1])
 	NLD_Segment_ID := parseLine(lines[2])
@@ -45,18 +45,21 @@ func InitFragilityCurveLocation(locationbytes []byte) FragilityCurveLocation {
 
 	for _, line := range lines {
 		row := strings.Split(line, ",")
-		xstring := row[0]
-		ystring := row[1]
-		xval, err := strconv.ParseFloat(xstring, 64)
-		if err != nil {
-			return FragilityCurveLocation{}
+		if len(row) > 2 {
+			xstring := row[0]
+			ystring := row[1]
+			xval, err := strconv.ParseFloat(xstring, 64)
+			if err != nil {
+				return FragilityCurveLocation{}
+			}
+			yval, err := strconv.ParseFloat(ystring, 64)
+			if err != nil {
+				return FragilityCurveLocation{}
+			}
+			xvals = append(xvals, xval)
+			yvals = append(yvals, statistics.DeterministicDistribution{Value: yval})
 		}
-		yval, err := strconv.ParseFloat(ystring, 64)
-		if err != nil {
-			return FragilityCurveLocation{}
-		}
-		xvals = append(xvals, xval)
-		yvals = append(yvals, statistics.DeterministicDistribution{Value: yval})
+
 	}
 	return FragilityCurveLocation{
 		Name:           name,
