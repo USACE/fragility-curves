@@ -1,6 +1,7 @@
 package fragilitycurve
 
 import (
+	"errors"
 	"math/rand"
 	"strconv"
 	"strings"
@@ -102,12 +103,23 @@ func (fcm Model) Compute(eventSeed int64, realizationSeed int64) (ModelResult, e
 	for idx, fcl := range fcm.Locations {
 		//sample fragility curve for a location with knowledge uncertianty
 		pd := fcl.FragilityCurve.SampleValueSampler(realizationRandom.Float64())
-		//sample sampledfragility curve at a location with natural variability
-		locationResult := FragilityCurveLocationResult{
-			Name:             fcl.Name,
-			FailureElevation: pd.SampleValue(eventRandom.Float64()),
+		pd2, ok := pd.(paireddata.PairedData)
+		if ok {
+			//invert the paired data because we will be sampling probability to derive a stage.
+			pd3 := paireddata.PairedData{
+				Xvals: pd2.Yvals,
+				Yvals: pd2.Xvals,
+			}
+			//sample sampledfragility curve at a location with natural variability
+			locationResult := FragilityCurveLocationResult{
+				Name:             fcl.Name,
+				FailureElevation: pd3.SampleValue(eventRandom.Float64()),
+			}
+			results.Results[idx] = locationResult
+		} else {
+			return ModelResult{}, errors.New("failed to convert to paired data")
 		}
-		results.Results[idx] = locationResult
+
 	}
 	return results, nil
 }

@@ -135,7 +135,7 @@ func createSampleData() paireddata.UncertaintyPairedData {
 	return paireddata.UncertaintyPairedData{Xvals: xs, Yvals: ydists}
 }
 func TestSampleFragilityCurve(t *testing.T) {
-	file, err := os.Open("/workspaces/fragilitycurveplugin/configs/fragilitycurve.json")
+	file, err := os.Open("/workspaces/fragilitycurveplugin/configs/curves/base_combined_system_response_curves.json")
 	if err != nil {
 		fmt.Println(err)
 		t.Fail()
