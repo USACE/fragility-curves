@@ -45,7 +45,7 @@ func InitFragilityCurveLocation(locationbytes []byte) FragilityCurveLocation {
 
 	for _, line := range lines {
 		row := strings.Split(line, ",")
-		if len(row) > 2 {
+		if len(row) >= 2 {
 			xstring := row[0]
 			ystring := row[1]
 			xval, err := strconv.ParseFloat(xstring, 64)

@@ -30,6 +30,21 @@ func TestModelUnMarshal(t *testing.T) {
 		t.Fail()
 	}
 }
+func TestLocationCSV(t *testing.T) {
+	file, err := os.Open("/workspaces/fragilitycurveplugin/configs/curves/TukwilaAuthA_fragilitycurve.csv")
+	if err != nil {
+		fmt.Println(err)
+		t.Fail()
+	}
+	body, err := io.ReadAll(file)
+	if err != nil {
+		fmt.Println(err)
+		t.Fail()
+	}
+	fcl := InitFragilityCurveLocation(body)
+	fmt.Println(fcl)
+
+}
 func TestModelCSV(t *testing.T) {
 	root := "/workspaces/fragilitycurveplugin/configs/curves/"
 	dirEntries, err := os.ReadDir(root)
