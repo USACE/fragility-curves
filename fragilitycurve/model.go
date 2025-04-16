@@ -8,6 +8,7 @@ import (
 
 	"github.com/HydrologicEngineeringCenter/go-statistics/paireddata"
 	"github.com/HydrologicEngineeringCenter/go-statistics/statistics"
+	"github.com/usace/cc-go-sdk/plugin"
 )
 
 type Model struct {
@@ -16,11 +17,11 @@ type Model struct {
 }
 type FragilityCurveLocation struct {
 	Name           string                           `json:"location"`
-	NLD_System_ID  string                           `json:"nld_system_id`
-	NLD_Segment_ID string                           `json:"nld_segment_id`
-	NIDID          string                           `json:"nidid`
-	FailureMode    string                           `json:"failure_mode`
-	Source         string                           `json:"source`
+	NLD_System_ID  string                           `json:"nld_system_id"`
+	NLD_Segment_ID string                           `json:"nld_segment_id"`
+	NIDID          string                           `json:"nidid"`
+	FailureMode    string                           `json:"failure_mode"`
+	Source         string                           `json:"source"`
 	FragilityCurve paireddata.UncertaintyPairedData `json:"probability-stage"`
 }
 type FragilityCurveLocationResult struct {
@@ -120,6 +121,18 @@ func (fcm Model) Compute(eventSeed int64, realizationSeed int64) (ModelResult, e
 			return ModelResult{}, errors.New("failed to convert to paired data")
 		}
 
+	}
+	return results, nil
+}
+func (fcm Model) ComputeAll(seeds []plugin.EventConfiguration) ([]ModelResult, error) {
+	results := make([]ModelResult, 0)
+	for _, seed := range seeds {
+		fcseedSet := seed.Seeds["fragilitycurveplugin"]
+		result, err := fcm.Compute(fcseedSet.EventSeed, fcseedSet.RealizationSeed)
+		if err != nil {
+			return results, err
+		}
+		results = append(results, result)
 	}
 	return results, nil
 }
