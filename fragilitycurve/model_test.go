@@ -6,6 +6,7 @@ import (
 	"io"
 	"io/ioutil"
 	"os"
+	"strings"
 	"testing"
 
 	"github.com/HydrologicEngineeringCenter/go-statistics/paireddata"
@@ -46,7 +47,7 @@ func TestLocationCSV(t *testing.T) {
 
 }
 func TestModelCSV(t *testing.T) {
-	root := "/workspaces/fragilitycurveplugin/configs/curves/"
+	root := "/workspaces/fragilitycurveplugin/configs/production/"
 	dirEntries, err := os.ReadDir(root)
 	if err != nil {
 		fmt.Println(err)
@@ -55,21 +56,23 @@ func TestModelCSV(t *testing.T) {
 	curves := make([]FragilityCurveLocation, 0)
 	for _, f := range dirEntries {
 		fmt.Println(f.Name())
-		file, err := os.Open(fmt.Sprintf("%v%v", root, f.Name()))
-		if err != nil {
-			fmt.Println(err)
-			t.Fail()
+		if strings.Contains(f.Name(), ".csv") {
+			file, err := os.Open(fmt.Sprintf("%v%v", root, f.Name()))
+			if err != nil {
+				fmt.Println(err)
+				t.Fail()
+			}
+			body, err := io.ReadAll(file)
+			if err != nil {
+				fmt.Println(err)
+				t.Fail()
+			}
+			fcl := InitFragilityCurveLocation(body)
+			curves = append(curves, fcl)
 		}
-		body, err := io.ReadAll(file)
-		if err != nil {
-			fmt.Println(err)
-			t.Fail()
-		}
-		fcl := InitFragilityCurveLocation(body)
-		curves = append(curves, fcl)
 	}
 	fcm := Model{
-		Name:      "base_combined",
+		Name:      "production",
 		Locations: curves,
 	}
 	bytes, errjson := json.Marshal(fcm)
@@ -77,7 +80,7 @@ func TestModelCSV(t *testing.T) {
 		fmt.Println(errjson)
 		t.Fail()
 	}
-	filepath := fmt.Sprintf("%v%v", root, "base_combined_system_response_curves.json")
+	filepath := fmt.Sprintf("%v%v", root, "production_system_response_curves_updates.json")
 
 	file, err := os.OpenFile(filepath, os.O_WRONLY|os.O_CREATE, 0600)
 	if err != nil {
