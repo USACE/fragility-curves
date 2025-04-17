@@ -8,8 +8,8 @@ import (
 	"log"
 
 	"github.com/usace/cc-go-sdk"
-	"github.com/usace/cc-go-sdk/plugin"
 	"github.com/usace/fragility-curves/fragilitycurve"
+	"github.com/usace/fragility-curves/utils"
 )
 
 func main() {
@@ -22,27 +22,29 @@ func main() {
 	for _, a := range payload.Actions {
 		switch a.Type {
 		case "single-sample":
-			err = computePayload(payload, pm)
+			err = computeAction(a)
 		case "all-samples":
-			err = computePayloadAll(payload, pm)
+			err = computeAllAction(a)
 		}
 	}
 
 	if err != nil {
 		pm.Logger.Error(err.Error())
+	} else {
+		pm.Logger.Info("payload compute complete")
 	}
 
 }
 
-func computePayload(payload cc.Payload, pm *cc.PluginManager) error {
+func computeAction(a cc.Action) error {
 
-	if len(payload.Outputs) != 1 {
+	if len(a.Outputs) != 1 {
 		err := errors.New("more than one output was defined")
 		return err
 	}
 
 	var fcm fragilitycurve.Model
-	modelReader, err := pm.GetReader(cc.DataSourceOpInput{DataSourceName: "fragilitycurve", PathKey: "default"})
+	modelReader, err := a.GetReader(cc.DataSourceOpInput{DataSourceName: "fragilitycurve", PathKey: "default"})
 	if err != nil {
 		return err
 	}
@@ -51,9 +53,9 @@ func computePayload(payload cc.Payload, pm *cc.PluginManager) error {
 	if err != nil {
 		return err
 	}
-	var seedSet plugin.SeedSet
-	var ec plugin.EventConfiguration
-	eventConfigurationReader, err := pm.GetReader(cc.DataSourceOpInput{DataSourceName: "seeds", PathKey: "default"})
+	var seedSet utils.SeedSet
+	var ec utils.EventConfiguration
+	eventConfigurationReader, err := a.GetReader(cc.DataSourceOpInput{DataSourceName: "seeds", PathKey: "default"})
 	if err != nil {
 		return err
 	}
@@ -79,24 +81,26 @@ func computePayload(payload cc.Payload, pm *cc.PluginManager) error {
 	fmt.Println(string(data))
 	input := cc.PutOpInput{
 		SrcReader:         bytes.NewReader(data),
-		DataSourceOpInput: cc.DataSourceOpInput{DataSourceName: payload.Outputs[0].Name, PathKey: "default"},
+		DataSourceOpInput: cc.DataSourceOpInput{DataSourceName: a.Outputs[0].Name, PathKey: "default"},
 	}
-	_, err = pm.Put(input)
+	_, err = a.Put(input)
 	if err != nil {
 		return err
 	}
-	pm.Logger.Info("payload compute complete")
+
 	return nil
 }
-func computePayloadAll(payload cc.Payload, pm *cc.PluginManager) error {
-
-	if len(payload.Outputs) != 1 {
+func computeAllAction(a cc.Action) error {
+	//
+	readSeedsFromTiledb := a.Attributes.GetBooleanOrDefault("seeds_format", false)
+	writeSamplesToTiledb := a.Attributes.GetBooleanOrDefault("elevations_format", false)
+	if len(a.Outputs) != 1 {
 		err := errors.New("more than one output was defined")
 		return err
 	}
 
 	var fcm fragilitycurve.Model
-	modelReader, err := pm.GetReader(cc.DataSourceOpInput{DataSourceName: "fragilitycurve", PathKey: "default"})
+	modelReader, err := a.GetReader(cc.DataSourceOpInput{DataSourceName: "fragilitycurve", PathKey: "default"})
 	if err != nil {
 		return err
 	}
@@ -105,33 +109,54 @@ func computePayloadAll(payload cc.Payload, pm *cc.PluginManager) error {
 	if err != nil {
 		return err
 	}
-	var ec plugin.EventConfiguration //todo: migrate to local version of event configuration, allow for tiledb or json
-	eventConfigurationReader, err := pm.GetReader(cc.DataSourceOpInput{DataSourceName: "seeds", PathKey: "default"})
+	//seeds
+	seeds := make([]utils.SeedSet, 0)
+	if readSeedsFromTiledb {
+		seeds, err = utils.ReadSeedsFromTiledb(a.IOManager, "store", "seeds", "fragilitycurveplugin") //improve this to not be hard coded.
+		if err != nil {
+			return err
+		}
+	} else {
+		//json
+		eventConfigurationReader, err := a.GetReader(cc.DataSourceOpInput{DataSourceName: "seeds", PathKey: "default"})
+		if err != nil {
+			return err
+		}
+		var ecs []utils.EventConfiguration
+		defer eventConfigurationReader.Close()
+		err = json.NewDecoder(eventConfigurationReader).Decode(&ecs)
+		if err != nil {
+			return err
+		}
+		for _, ec := range ecs {
+			seeds = append(seeds, ec.Seeds["fragilitycurveplugin"])
+		}
+	}
+
+	modelResult, err := fcm.ComputeAll(seeds)
 	if err != nil {
 		return err
 	}
-	defer eventConfigurationReader.Close()
-	err = json.NewDecoder(eventConfigurationReader).Decode(&ec)
-	if err != nil {
-		return err
+	if writeSamplesToTiledb {
+		err = fragilitycurve.WriteFailureElevationsToTiledb(a.IOManager, "store", "failure_elevations", modelResult)
+		if err != nil {
+			return err
+		}
+	} else {
+		data, err := json.Marshal(modelResult)
+		if err != nil {
+			return err
+		}
+		//fmt.Println(string(data))
+		input := cc.PutOpInput{
+			SrcReader:         bytes.NewReader(data),
+			DataSourceOpInput: cc.DataSourceOpInput{DataSourceName: a.Outputs[0].Name, PathKey: "default"},
+		}
+		_, err = a.Put(input)
+		if err != nil {
+			return err
+		}
 	}
-	modelResult, err := fcm.ComputeAll([]plugin.EventConfiguration{ec}) //update for all seeds in the simulation.
-	if err != nil {
-		return err
-	}
-	data, err := json.Marshal(modelResult)
-	if err != nil {
-		return err
-	}
-	fmt.Println(string(data))
-	input := cc.PutOpInput{
-		SrcReader:         bytes.NewReader(data),
-		DataSourceOpInput: cc.DataSourceOpInput{DataSourceName: payload.Outputs[0].Name, PathKey: "default"},
-	}
-	_, err = pm.Put(input)
-	if err != nil {
-		return err
-	}
-	pm.Logger.Info("payload compute complete")
+
 	return nil
 }

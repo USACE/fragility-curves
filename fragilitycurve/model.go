@@ -8,7 +8,7 @@ import (
 
 	"github.com/HydrologicEngineeringCenter/go-statistics/paireddata"
 	"github.com/HydrologicEngineeringCenter/go-statistics/statistics"
-	"github.com/usace/cc-go-sdk/plugin"
+	"github.com/usace/fragility-curves/utils"
 )
 
 type Model struct {
@@ -124,11 +124,10 @@ func (fcm Model) Compute(eventSeed int64, realizationSeed int64) (ModelResult, e
 	}
 	return results, nil
 }
-func (fcm Model) ComputeAll(seeds []plugin.EventConfiguration) ([]ModelResult, error) {
+func (fcm Model) ComputeAll(seeds []utils.SeedSet) ([]ModelResult, error) {
 	results := make([]ModelResult, 0)
 	for _, seed := range seeds {
-		fcseedSet := seed.Seeds["fragilitycurveplugin"]
-		result, err := fcm.Compute(fcseedSet.EventSeed, fcseedSet.RealizationSeed)
+		result, err := fcm.Compute(seed.EventSeed, seed.RealizationSeed)
 		if err != nil {
 			return results, err
 		}
