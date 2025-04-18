@@ -8,12 +8,15 @@ import (
 	"log"
 
 	"github.com/usace/cc-go-sdk"
+	tiledb "github.com/usace/cc-go-sdk/tiledb-store"
 	"github.com/usace/fragility-curves/fragilitycurve"
 	"github.com/usace/fragility-curves/utils"
 )
 
 func main() {
 	fmt.Println("Fragility Curves!")
+	//register tiledb
+	cc.DataStoreTypeRegistry.Register("TILEDB", tiledb.TileDbEventStore{})
 	pm, err := cc.InitPluginManager()
 	if err != nil {
 		log.Fatalf("Unable to initialize the plugin manager: %s\n", err)

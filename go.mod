@@ -7,6 +7,7 @@ toolchain go1.23.6
 require github.com/HydrologicEngineeringCenter/go-statistics v0.0.0-20240126145250-a17483ae0981
 
 require (
+	github.com/TileDB-Inc/TileDB-Go v0.32.0 // indirect
 	github.com/aws/aws-sdk-go v1.54.3 // indirect
 	github.com/aws/aws-sdk-go-v2 v1.36.3 // indirect
 	github.com/aws/aws-sdk-go-v2/aws/protocol/eventstream v1.6.10 // indirect
@@ -34,11 +35,13 @@ require (
 	github.com/invopop/jsonschema v0.13.0 // indirect
 	github.com/jmespath/go-jmespath v0.4.0 // indirect
 	github.com/mailru/easyjson v0.9.0 // indirect
+	github.com/mattn/go-pointer v0.0.1 // indirect
 	github.com/mitchellh/mapstructure v1.5.0 // indirect
 	github.com/spf13/cast v1.7.1 // indirect
 	github.com/usace/filesapi v0.0.0-20250320132414-61c781325b9a // indirect
 	github.com/usace/filestore v0.0.0-20230130152432-edce4c2aa925 // indirect
 	github.com/wk8/go-ordered-map/v2 v2.1.8 // indirect
+	go4.org/unsafe/assume-no-moving-gc v0.0.0-20230525183740-e7c30c78aeb2 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
 
