@@ -73,7 +73,7 @@ func computeAction(a cc.Action) error {
 	if !seedsFound {
 		return fmt.Errorf("no seeds found by name of %v", seedSetName)
 	}
-	modelResult, err := fcm.Compute(seedSet.EventSeed, seedSet.RealizationSeed)
+	modelResult, err := fcm.Compute(seedSet.BlockSeed, seedSet.RealizationSeed)
 	if err != nil {
 		return err
 	}
