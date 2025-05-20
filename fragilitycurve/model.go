@@ -8,6 +8,7 @@ import (
 
 	"github.com/HydrologicEngineeringCenter/go-statistics/paireddata"
 	"github.com/HydrologicEngineeringCenter/go-statistics/statistics"
+	"github.com/usace/fragility-curves/utils"
 )
 
 type Model struct {
@@ -16,11 +17,11 @@ type Model struct {
 }
 type FragilityCurveLocation struct {
 	Name           string                           `json:"location"`
-	NLD_System_ID  string                           `json:"nld_system_id`
-	NLD_Segment_ID string                           `json:"nld_segment_id`
-	NIDID          string                           `json:"nidid`
-	FailureMode    string                           `json:"failure_mode`
-	Source         string                           `json:"source`
+	NLD_System_ID  string                           `json:"nld_system_id"`
+	NLD_Segment_ID string                           `json:"nld_segment_id"`
+	NIDID          string                           `json:"nidid"`
+	FailureMode    string                           `json:"failure_mode"`
+	Source         string                           `json:"source"`
 	FragilityCurve paireddata.UncertaintyPairedData `json:"probability-stage"`
 }
 type FragilityCurveLocationResult struct {
@@ -94,15 +95,15 @@ func parseLine(line string) string {
 		}
 	}
 }
-func (fcm Model) Compute(eventSeed int64, realizationSeed int64) (ModelResult, error) {
-	realizationRandom := rand.New(rand.NewSource(realizationSeed))
-	eventRandom := rand.New(rand.NewSource(eventSeed))
+func (fcm Model) Compute(variabilitySeed int64, uncertaintySeed int64) (ModelResult, error) {
+	uncertaintyRandom := rand.New(rand.NewSource(uncertaintySeed))
+	variabilityRandom := rand.New(rand.NewSource(variabilitySeed))
 	results := ModelResult{
 		Results: make([]FragilityCurveLocationResult, len(fcm.Locations)),
 	}
 	for idx, fcl := range fcm.Locations {
 		//sample fragility curve for a location with knowledge uncertianty
-		pd := fcl.FragilityCurve.SampleValueSampler(realizationRandom.Float64())
+		pd := fcl.FragilityCurve.SampleValueSampler(uncertaintyRandom.Float64())
 		pd2, ok := pd.(paireddata.PairedData)
 		if ok {
 			//invert the paired data because we will be sampling probability to derive a stage.
@@ -113,13 +114,24 @@ func (fcm Model) Compute(eventSeed int64, realizationSeed int64) (ModelResult, e
 			//sample sampledfragility curve at a location with natural variability
 			locationResult := FragilityCurveLocationResult{
 				Name:             fcl.Name,
-				FailureElevation: pd3.SampleValue(eventRandom.Float64()),
+				FailureElevation: pd3.SampleValue(variabilityRandom.Float64()),
 			}
 			results.Results[idx] = locationResult
 		} else {
 			return ModelResult{}, errors.New("failed to convert to paired data")
 		}
 
+	}
+	return results, nil
+}
+func (fcm Model) ComputeAll(seeds []utils.SeedSet) ([]ModelResult, error) {
+	results := make([]ModelResult, 0)
+	for _, seed := range seeds {
+		result, err := fcm.Compute(seed.BlockSeed, seed.RealizationSeed)
+		if err != nil {
+			return results, err
+		}
+		results = append(results, result)
 	}
 	return results, nil
 }
