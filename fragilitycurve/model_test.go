@@ -31,6 +31,83 @@ func TestModelUnMarshal(t *testing.T) {
 		t.Fail()
 	}
 }
+func TestSplitMultiCurveCSVToIndividualCSV(t *testing.T) {
+	file, err := os.Open("/workspaces/fragilitycurveplugin/configs/trinity/conformance/system-response/Trinity Basin_Levee_SystemResponse_2025.06_csv.csv")
+	if err != nil {
+		fmt.Println(err)
+		t.Fail()
+	}
+	body, err := io.ReadAll(file)
+	if err != nil {
+		fmt.Println(err)
+		t.Fail()
+	}
+	strbody := string(body)
+	strbodylines := strings.Split(strbody, "\n")
+	hdrelements := strings.Split(strbodylines[1], ",")
+	if len(hdrelements) > 2 {
+		//figure out how many we will be processing and start writing out the independent csv files.
+		count := len(hdrelements) / 2
+		curves := make([]string, count)
+		for _, row := range strbodylines {
+			elements := strings.Split(row, ",")
+			if len(elements) >= (((count - 1) * 2) + 1) {
+				if len(elements) != len(hdrelements) {
+					fmt.Println(row)
+				}
+				for i := 0; i < count; i++ {
+					curves[i] = fmt.Sprintf("%s%s,%s\n", curves[i], elements[i*2], elements[i*2+1])
+				}
+			}
+		}
+		//write out each curve
+		for i := 0; i < count; i++ {
+			path := fmt.Sprintf("/workspaces/fragilitycurveplugin/configs/trinity/conformance/system-response/%v_fragilitycurve.csv", hdrelements[i*2+1])
+			curves[i] = strings.TrimRight(curves[i], "\n")
+			data := []byte(curves[i])
+			err := os.WriteFile(path, data, 0600)
+			if err != nil {
+				t.Fail()
+			}
+		}
+
+	} else {
+		fcl := InitFragilityCurveLocation(body)
+		fmt.Println(fcl)
+	}
+
+}
+func TestFixNIDCSVs(t *testing.T) {
+	root := "/workspaces/fragilitycurveplugin/configs/trinity/conformance/system-response/"
+	dirEntries, err := os.ReadDir(root)
+	if err != nil {
+		fmt.Println(err)
+		t.Fail()
+	}
+	for _, f := range dirEntries {
+		fmt.Println(f.Name())
+		if strings.Contains(f.Name(), ".csv") {
+			file, err := os.Open(fmt.Sprintf("%v%v", root, f.Name()))
+			if err != nil {
+				fmt.Println(err)
+				t.Fail()
+			}
+			body, err := io.ReadAll(file)
+			if err != nil {
+				fmt.Println(err)
+				t.Fail()
+			}
+			file.Close()
+			strbody := string(body)
+			newbody := strings.TrimRight(strbody, "\n")
+			newdata := []byte(newbody)
+			err = os.WriteFile(fmt.Sprintf("%v%v", root, f.Name()), newdata, 0600)
+			if err != nil {
+				t.Fail()
+			}
+		}
+	}
+}
 func TestLocationCSV(t *testing.T) {
 	file, err := os.Open("/workspaces/fragilitycurveplugin/configs/curves/TukwilaAuthA_fragilitycurve.csv")
 	if err != nil {
@@ -47,7 +124,7 @@ func TestLocationCSV(t *testing.T) {
 
 }
 func TestModelCSV(t *testing.T) {
-	root := "/workspaces/fragilitycurveplugin/configs/production/"
+	root := "/workspaces/fragilitycurveplugin/configs/trinity/conformance/system-response/"
 	dirEntries, err := os.ReadDir(root)
 	if err != nil {
 		fmt.Println(err)
@@ -72,7 +149,7 @@ func TestModelCSV(t *testing.T) {
 		}
 	}
 	fcm := Model{
-		Name:      "production",
+		Name:      "conformance",
 		Locations: curves,
 	}
 	bytes, errjson := json.Marshal(fcm)
@@ -80,7 +157,7 @@ func TestModelCSV(t *testing.T) {
 		fmt.Println(errjson)
 		t.Fail()
 	}
-	filepath := fmt.Sprintf("%v%v", root, "production_system_response_curves_updates.json")
+	filepath := fmt.Sprintf("%v%v", root, "conformance_system_response_curves.json")
 
 	file, err := os.OpenFile(filepath, os.O_WRONLY|os.O_CREATE, 0600)
 	if err != nil {
@@ -88,6 +165,45 @@ func TestModelCSV(t *testing.T) {
 		t.Fail()
 	}
 	_, err = file.Write(bytes)
+	if err != nil {
+		fmt.Println(err)
+		t.Fail()
+	}
+}
+func TestModelNames(t *testing.T) {
+	root := "/workspaces/fragilitycurveplugin/configs/trinity/conformance/system-response/"
+	dirEntries, err := os.ReadDir(root)
+	if err != nil {
+		fmt.Println(err)
+		t.Fail()
+	}
+	curvenames := "model_unit,location_name\n"
+	for _, f := range dirEntries {
+		fmt.Println(f.Name())
+		if strings.Contains(f.Name(), ".csv") {
+			file, err := os.Open(fmt.Sprintf("%v%v", root, f.Name()))
+			if err != nil {
+				fmt.Println(err)
+				t.Fail()
+			}
+			body, err := io.ReadAll(file)
+			if err != nil {
+				fmt.Println(err)
+				t.Fail()
+			}
+			fcl := InitFragilityCurveLocation(body)
+			curvenames = fmt.Sprintf("%s%s,%s\n", curvenames, fcl.Hydraulic_Model_Unit, fcl.Name)
+		}
+	}
+
+	filepath := fmt.Sprintf("%v%v", root, "connectionNames")
+
+	file, err := os.OpenFile(filepath, os.O_WRONLY|os.O_CREATE, 0600)
+	if err != nil {
+		fmt.Println(err)
+		t.Fail()
+	}
+	_, err = file.Write([]byte(curvenames))
 	if err != nil {
 		fmt.Println(err)
 		t.Fail()

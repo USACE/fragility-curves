@@ -16,13 +16,19 @@ type Model struct {
 	Locations []FragilityCurveLocation `json:"locations"`
 }
 type FragilityCurveLocation struct {
-	Name           string                           `json:"location"`
-	NLD_System_ID  string                           `json:"nld_system_id"`
-	NLD_Segment_ID string                           `json:"nld_segment_id"`
-	NIDID          string                           `json:"nidid"`
-	FailureMode    string                           `json:"failure_mode"`
-	Source         string                           `json:"source"`
-	FragilityCurve paireddata.UncertaintyPairedData `json:"probability-stage"`
+	Hydraulic_Model_Unit string                           `json:"hydraulic_model_unit"`
+	Name                 string                           `json:"location"`
+	Breach_FID           string                           `json:"breach_fid"`
+	NLD_System_ID        string                           `json:"nld_system_id"`
+	NLD_System_Name      string                           `json:"nld_system_name"`
+	NLD_Segment_ID       string                           `json:"nld_segment_id"`
+	NIDID                string                           `json:"nidid"`
+	NID_Dam_Name         string                           `json:"nid_dam_name"`
+	FailureMode          string                           `json:"failure_mode"`
+	Source               string                           `json:"source"`
+	Top_Elev             string                           `json:"top_elev"`
+	Toe_Elev             string                           `json:"toe_elev"`
+	FragilityCurve       paireddata.UncertaintyPairedData `json:"probability-stage"`
 }
 type FragilityCurveLocationResult struct {
 	Name             string  `json:"location"`
@@ -34,14 +40,21 @@ type ModelResult struct {
 
 func InitFragilityCurveLocation(locationbytes []byte) FragilityCurveLocation {
 	file := string(locationbytes)
-	lines := strings.Split(file, "\r\n")
-	name := parseLine(lines[0])
-	NLD_System_Id := parseLine(lines[1])
-	NLD_Segment_ID := parseLine(lines[2])
-	NIDID := parseLine(lines[3])
-	failure_mode := parseLine(lines[4])
-	source := parseLine(lines[5])
-	lines = lines[7:] //skip stage,probability
+	file = strings.ReplaceAll(file, "\r", "")
+	lines := strings.Split(file, "\n")
+	hydraulic_model_unit := parseLine(lines[0])
+	name := parseLine(lines[1])
+	breachfid := parseLine(lines[2])
+	NLD_System_Id := parseLine(lines[3])
+	NLD_System_Name := parseLine(lines[4])
+	NLD_Segment_ID := parseLine(lines[5])
+	NIDID := parseLine(lines[6])
+	nid_dam_name := parseLine(lines[7])
+	failure_mode := parseLine(lines[8])
+	source := parseLine(lines[9])
+	top_elev := parseLine(lines[10])
+	toe_elev := parseLine(lines[11])
+	lines = lines[13:] //skip stage,probability
 	xvals := make([]float64, 0)
 	yvals := make([]statistics.ContinuousDistribution, 0)
 
@@ -64,13 +77,19 @@ func InitFragilityCurveLocation(locationbytes []byte) FragilityCurveLocation {
 
 	}
 	return FragilityCurveLocation{
-		Name:           name,
-		NLD_System_ID:  NLD_System_Id,
-		NLD_Segment_ID: NLD_Segment_ID,
-		NIDID:          NIDID,
-		FailureMode:    failure_mode,
-		Source:         source,
-		FragilityCurve: paireddata.UncertaintyPairedData{Xvals: xvals, Yvals: yvals},
+		Hydraulic_Model_Unit: hydraulic_model_unit,
+		Name:                 name,
+		Breach_FID:           breachfid,
+		NLD_System_ID:        NLD_System_Id,
+		NLD_System_Name:      NLD_System_Name,
+		NLD_Segment_ID:       NLD_Segment_ID,
+		NIDID:                NIDID,
+		NID_Dam_Name:         nid_dam_name,
+		FailureMode:          failure_mode,
+		Source:               source,
+		Top_Elev:             top_elev,
+		Toe_Elev:             toe_elev,
+		FragilityCurve:       paireddata.UncertaintyPairedData{Xvals: xvals, Yvals: yvals},
 	}
 }
 func parseLine(line string) string {
