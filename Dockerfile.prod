@@ -1,22 +1,30 @@
-FROM golang:1.20-alpine3.16 AS builder
+FROM cc-tiledb AS builder
 
-RUN apk add --no-cache \
-    build-base \
-    gcc \
-    git
-ENV GOROOT=/usr/local/go
-ENV GOPATH=/go
-ENV PATH=$PATH:$GOROOT/bin:$GOPATH/bin
+RUN apt update &&\
+	apt -y install gdal-bin gdal-data libgdal-dev
 
 WORKDIR /app
 RUN git clone https://github.com/USACE/fragility-curves.git
 WORKDIR /app/fragility-curves
 RUN go mod download
 RUN go mod tidy
-RUN go build main.go
+RUN GOAMD64=v1 go build main.go
 
+FROM ubuntu:24.04 AS prod
 
-FROM alpine:3.16 AS prod
+ARG TILEDB_VERSION=2.26.2
+ARG TILEDB_LIB=/tiledb
+
+ENV PATH=/root/.local/bin:$PATH
+ENV LD_LIBRARY_PATH="${TILEDB_LIB}/lib"
+ENV VCPKG_FORCE_SYSTEM_BINARIES=1
+ENV LIBRARY_PATH="${TILEDB_LIB}/lib"
+
+RUN apt update &&\
+    apt -y install libssl-dev libbz2-dev libgdbm-dev uuid-dev libncurses-dev libffi-dev libgdbm-compat-dev sqlite3 lzma lzma-dev &&\
+    apt -y install gdal-bin gdal-data libgdal-dev
+
+COPY --from=builder /tiledb /tiledb
 
 WORKDIR /app
 COPY --from=builder /app/fragility-curves/main .
