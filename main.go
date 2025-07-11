@@ -6,6 +6,8 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"strings"
+	"time"
 
 	"github.com/usace/cc-go-sdk"
 	tiledb "github.com/usace/cc-go-sdk/tiledb-store"
@@ -146,10 +148,45 @@ func computeAllAction(a cc.Action) error {
 			return err
 		}
 	} else {
-		data, err := json.Marshal(modelResult)
-		if err != nil {
-			return err
+		strdata := ""
+		pathPattern := a.Outputs[0].Paths["event"]
+		tenpercent := len(modelResult) / 10
+		percent_complete := 0
+		for i, r := range modelResult {
+			istring := fmt.Sprintf("%v", i+1)
+			if i%tenpercent == 0 {
+				fmt.Printf("%v percent complete\n", percent_complete)
+				fmt.Println(time.Now())
+				percent_complete += 10
+			}
+			if i == 0 {
+				strdata = "event_number"
+				for _, elev := range r.Results {
+					strdata = fmt.Sprintf("%s,%s", strdata, elev.Name)
+				}
+				strdata = fmt.Sprintf("%s\n", strdata)
+			}
+			strdata = fmt.Sprintf("%s%s", strdata, istring)
+			for _, elev := range r.Results {
+				strdata = fmt.Sprintf("%s,%v", strdata, elev.FailureElevation)
+			}
+			strdata = fmt.Sprintf("%s\n", strdata)
+
+			a.Outputs[0].Paths["event"] = strings.ReplaceAll(pathPattern, "$<eventnumber>", istring)
+			data, err := json.Marshal(r)
+			if err != nil {
+				return err
+			}
+			input := cc.PutOpInput{
+				SrcReader:         bytes.NewReader(data),
+				DataSourceOpInput: cc.DataSourceOpInput{DataSourceName: a.Outputs[0].Name, PathKey: "event"},
+			}
+			_, err = a.Put(input)
+			if err != nil {
+				return err
+			}
 		}
+		data := []byte(strdata)
 		//fmt.Println(string(data))
 		input := cc.PutOpInput{
 			SrcReader:         bytes.NewReader(data),
