@@ -148,7 +148,7 @@ func computeAllAction(a cc.Action) error {
 			return err
 		}
 	} else {
-		strdata := ""
+		strdatab := strings.Builder{}
 		pathPattern := a.Outputs[0].Paths["event"]
 		tenpercent := len(modelResult) / 10
 		percent_complete := 0
@@ -160,17 +160,17 @@ func computeAllAction(a cc.Action) error {
 				percent_complete += 10
 			}
 			if i == 0 {
-				strdata = "event_number"
+				strdatab.WriteString("event_number")
 				for _, elev := range r.Results {
-					strdata = fmt.Sprintf("%s,%s", strdata, elev.Name)
+					strdatab.WriteString(fmt.Sprintf(",%s", elev.Name))
 				}
-				strdata = fmt.Sprintf("%s\n", strdata)
+				strdatab.WriteString("\n")
 			}
-			strdata = fmt.Sprintf("%s%s", strdata, istring)
+			strdatab.WriteString(istring)
 			for _, elev := range r.Results {
-				strdata = fmt.Sprintf("%s,%v", strdata, elev.FailureElevation)
+				strdatab.WriteString(fmt.Sprintf(",%v", elev.FailureElevation))
 			}
-			strdata = fmt.Sprintf("%s\n", strdata)
+			strdatab.WriteString("\n")
 
 			a.Outputs[0].Paths["event"] = strings.ReplaceAll(pathPattern, "$<eventnumber>", istring)
 			data, err := json.Marshal(r)
@@ -186,7 +186,7 @@ func computeAllAction(a cc.Action) error {
 				return err
 			}
 		}
-		data := []byte(strdata)
+		data := []byte(strdatab.String())
 		//fmt.Println(string(data))
 		input := cc.PutOpInput{
 			SrcReader:         bytes.NewReader(data),
